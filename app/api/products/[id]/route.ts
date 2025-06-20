@@ -1,0 +1,76 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/lib/firebaseAdmin';
+
+const productsRef = db.collection('products');
+
+function corsHeaders(origin?: string | null) {
+  const allowedOrigins = [
+    'http://localhost:8081',
+    'http://localhost:5173',
+    'https://your-frontend.vercel.app',
+  ];
+  const allowed = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
+  return {
+    'Access-Control-Allow-Origin': allowed,
+    'Access-Control-Allow-Methods': 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Credentials': 'true',
+  };
+}
+
+export async function OPTIONS(req: NextRequest) {
+  const origin = req.headers.get('origin');
+  return new NextResponse(null, {
+    status: 204,
+    headers: corsHeaders(origin),
+  });
+}
+
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+  const origin = req.headers.get('origin');
+  try {
+    const doc = await productsRef.doc(params.id).get();
+    if (!doc.exists) {
+      return NextResponse.json({ message: 'Product not found' }, { status: 404, headers: corsHeaders(origin) });
+    }
+    return NextResponse.json({ ...doc.data(), id: doc.id }, { headers: corsHeaders(origin) });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to fetch product';
+    return NextResponse.json({ message: errorMessage }, { status: 500, headers: corsHeaders(origin) });
+  }
+}
+
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+  const origin = req.headers.get('origin');
+  try {
+    const data = await req.json();
+    delete data.id;
+    await productsRef.doc(params.id).update({
+      ...data,
+      meta: {
+        ...data.meta,
+        updatedAt: new Date().toISOString(),
+      },
+    });
+    const updatedDoc = await productsRef.doc(params.id).get();
+    return NextResponse.json({ ...updatedDoc.data(), id: updatedDoc.id }, { headers: corsHeaders(origin) });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to update product';
+    return NextResponse.json({ message: errorMessage }, { status: 500, headers: corsHeaders(origin) });
+  }
+}
+
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  const origin = req.headers.get('origin');
+  try {
+    const doc = await productsRef.doc(params.id).get();
+    if (!doc.exists) {
+      return NextResponse.json({ message: 'Product not found' }, { status: 404, headers: corsHeaders(origin) });
+    }
+    await productsRef.doc(params.id).delete();
+    return NextResponse.json({ message: 'Product deleted successfully' }, { headers: corsHeaders(origin) });
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Failed to delete product';
+    return NextResponse.json({ message: errorMessage }, { status: 500, headers: corsHeaders(origin) });
+  }
+} 

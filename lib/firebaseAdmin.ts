@@ -3,7 +3,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 
 if (!process.env.FIREBASE_PRIVATE_KEY || !process.env.FIREBASE_CLIENT_EMAIL) {
   throw new Error(
-    'Firebase credentials are not set. Please create a .env.local file and add your service account credentials.'
+    'Firebase credentials are not set. Please add your service account credentials.'
   );
 }
 
@@ -12,9 +12,9 @@ if (!process.env.FIREBASE_PRIVATE_KEY || !process.env.FIREBASE_CLIENT_EMAIL) {
 // You'll need to download a service account key from Firebase Console
 const firebaseConfig = {
   credential: cert({
-    projectId: process.env.FIREBASE_PROJECT_ID || "products-4d6a3",
+    projectId: process.env.FIREBASE_PROJECT_ID,
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
   }),
 };
 

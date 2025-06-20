@@ -2,15 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebaseAdmin';
 import { Product } from '@/types/product';
 
-// Helper to get products collection
 const productsRef = db.collection('products');
 
-// CORS handler supporting local and production frontends
 function corsHeaders(origin?: string | null) {
   const allowedOrigins = [
     'http://localhost:8081',
     'http://localhost:5173',
-    'https://shop-smart-and-chic.vercel.app', // <-- replace with your actual deployed frontend URL
+    'https://your-frontend.vercel.app', // <-- replace with your actual deployed frontend URL
   ];
   const allowed = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
   return {
@@ -29,7 +27,6 @@ export async function OPTIONS(req: NextRequest) {
   });
 }
 
-// GET /api/products?limit=10&skip=0
 export async function GET(req: NextRequest) {
   const origin = req.headers.get('origin');
   const { searchParams } = new URL(req.url);
@@ -41,12 +38,10 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ products }, { headers: corsHeaders(origin) });
 }
 
-// POST /api/products
 export async function POST(req: NextRequest) {
   const origin = req.headers.get('origin');
   try {
     const data = await req.json();
-    // Remove id if present, Firestore will generate one
     delete data.id;
     const docRef = await productsRef.add(data);
     const newDoc = await docRef.get();
