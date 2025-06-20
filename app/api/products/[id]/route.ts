@@ -5,6 +5,7 @@ const productsRef = db.collection('products');
 
 function corsHeaders(origin?: string | null) {
   const allowedOrigins = [
+    'https://shop-smart-and-chic.vercel.app',
     'http://localhost:8081',
     'http://localhost:5173',
     'https://shop-smart-and-chic.vercel.app',
