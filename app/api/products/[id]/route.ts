@@ -7,7 +7,7 @@ function corsHeaders(origin?: string | null) {
   const allowedOrigins = [
     'http://localhost:8081',
     'http://localhost:5173',
-    'https://your-frontend.vercel.app',
+    'https://shop-smart-and-chic.vercel.app',
   ];
   const allowed = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
   return {
