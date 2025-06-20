@@ -5,13 +5,12 @@ const productsRef = db.collection('products');
 
 function corsHeaders(origin?: string | null) {
   const allowedOrigins = [
+    'https://shop-smart-and-chic.vercel.app',
     'http://localhost:8081',
-    'http://localhost:5173',
-    'https://your-frontend.vercel.app',
+    'http://localhost:5173'
   ];
-  const allowed = origin && allowedOrigins.includes(origin) ? origin : allowedOrigins[0];
   return {
-    'Access-Control-Allow-Origin': allowed,
+    'Access-Control-Allow-Origin': origin && allowedOrigins.includes(origin) ? origin : '',
     'Access-Control-Allow-Methods': 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Credentials': 'true',
@@ -30,7 +29,7 @@ export async function GET(req: NextRequest) {
   const origin = req.headers.get('origin');
   try {
     const snapshot = await productsRef.get();
-    const brands = new Set<string>();
+    const brands = new Set();
     snapshot.docs.forEach(doc => {
       const data = doc.data();
       if (data.brand) brands.add(data.brand);
