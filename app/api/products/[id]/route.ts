@@ -26,10 +26,10 @@ export async function OPTIONS(req: NextRequest) {
   });
 }
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, context: { params: { id: string } }) {
   const origin = req.headers.get('origin');
   try {
-    const doc = await productsRef.doc(params.id).get();
+    const doc = await productsRef.doc(context.params.id).get();
     if (!doc.exists) {
       return NextResponse.json({ message: 'Product not found' }, { status: 404, headers: corsHeaders(origin) });
     }
@@ -40,19 +40,19 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, context: { params: { id: string } }) {
   const origin = req.headers.get('origin');
   try {
     const data = await req.json();
     delete data.id;
-    await productsRef.doc(params.id).update({
+    await productsRef.doc(context.params.id).update({
       ...data,
       meta: {
         ...data.meta,
         updatedAt: new Date().toISOString(),
       },
     });
-    const updatedDoc = await productsRef.doc(params.id).get();
+    const updatedDoc = await productsRef.doc(context.params.id).get();
     return NextResponse.json({ ...updatedDoc.data(), id: updatedDoc.id }, { headers: corsHeaders(origin) });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to update product';
@@ -60,14 +60,14 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
   const origin = req.headers.get('origin');
   try {
-    const doc = await productsRef.doc(params.id).get();
+    const doc = await productsRef.doc(context.params.id).get();
     if (!doc.exists) {
       return NextResponse.json({ message: 'Product not found' }, { status: 404, headers: corsHeaders(origin) });
     }
-    await productsRef.doc(params.id).delete();
+    await productsRef.doc(context.params.id).delete();
     return NextResponse.json({ message: 'Product deleted successfully' }, { headers: corsHeaders(origin) });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : 'Failed to delete product';
